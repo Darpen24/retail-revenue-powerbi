@@ -1,7 +1,6 @@
 from pathlib import Path
 import json
 import urllib.request
-from urllib.parse import urljoin
 import warnings
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
