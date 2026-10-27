@@ -24,11 +24,11 @@
                       "Entity": "FactSales"
                     }
                   },
-                  "Property": "Known Customers"
+                  "Property": "Known Customers Display"
                 }
               },
-              "queryRef": "FactSales.Known Customers",
-              "nativeQueryRef": "Known Customers"
+              "queryRef": "FactSales.Known Customers Display",
+              "nativeQueryRef": "Known Customers Display"
             }
           ]
         }
@@ -59,7 +59,14 @@
             "labelDisplayUnits": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "1D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
                 }
               }
             }

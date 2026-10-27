@@ -23,3 +23,25 @@ Invalid Rows = CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = "02 Inval
 Duplicates Removed = CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = "03 Exact duplicates removed")
 
 Rows Loaded = CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = "05 Rows loaded")
+
+// Presentation-only text measures; numeric KPIs remain the basis for analysis.
+
+Net Sales Display = "£" & FORMAT(DIVIDE([Net Sales], 1000000), "0.00", "en-GB") & "m"
+
+Orders Display = FORMAT([Orders], "#,##0", "en-GB")
+
+Average Order Value Display = "£" & FORMAT([Average Order Value], "0.00", "en-GB")
+
+Known Customers Display = FORMAT([Known Customers], "#,##0", "en-GB")
+
+Credit Value Ratio Display = FORMAT([Credit Value Ratio], "0.00%", "en-GB")
+
+Source Rows Display = FORMAT([Source Rows], "#,##0", "en-GB")
+
+Invalid Rows Display = FORMAT([Invalid Rows], "#,##0", "en-GB")
+
+Duplicates Removed Display = FORMAT([Duplicates Removed], "#,##0", "en-GB")
+
+Rows Loaded Display = FORMAT([Rows Loaded], "#,##0", "en-GB")
+
+Identified Sales Share Display = FORMAT([Identified Sales Share], "0.00%", "en-GB")

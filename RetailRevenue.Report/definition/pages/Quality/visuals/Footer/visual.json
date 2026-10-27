@@ -3,9 +3,9 @@
   "name": "Footer",
   "position": {
     "x": 32,
-    "y": 866,
+    "y": 850,
     "width": 1370,
-    "height": 24,
+    "height": 46,
     "z": 6,
     "tabOrder": 6
   },

@@ -4,14 +4,13 @@
   "position": {
     "x": 886,
     "y": 246,
-    "width": 522,
-    "height": 332,
     "z": 18,
+    "height": 332,
+    "width": 522,
     "tabOrder": 18
   },
   "visual": {
     "visualType": "donutChart",
-    "drillFilterOtherVisuals": true,
     "query": {
       "queryState": {
         "Category": {
@@ -28,7 +27,8 @@
                 }
               },
               "queryRef": "DimCountry.Market",
-              "nativeQueryRef": "Market"
+              "nativeQueryRef": "Market",
+              "active": true
             }
           ]
         },
@@ -190,6 +190,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

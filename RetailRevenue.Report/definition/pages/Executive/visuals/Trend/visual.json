@@ -4,14 +4,13 @@
   "position": {
     "x": 32,
     "y": 246,
-    "width": 830,
-    "height": 332,
     "z": 17,
+    "height": 332,
+    "width": 830,
     "tabOrder": 17
   },
   "visual": {
     "visualType": "lineChart",
-    "drillFilterOtherVisuals": true,
     "query": {
       "queryState": {
         "Category": {
@@ -28,7 +27,8 @@
                 }
               },
               "queryRef": "DimDate.Month",
-              "nativeQueryRef": "Month"
+              "nativeQueryRef": "Month",
+              "active": true
             }
           ]
         },
@@ -80,8 +80,7 @@
             },
             "direction": "Ascending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
     "objects": {
@@ -124,17 +123,13 @@
           }
         }
       ],
-      "dataPoint": [
+      "lineStyles": [
         {
           "properties": {
-            "defaultColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#0D9488'"
-                    }
-                  }
+            "strokeWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "3D"
                 }
               }
             }
@@ -252,6 +247,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

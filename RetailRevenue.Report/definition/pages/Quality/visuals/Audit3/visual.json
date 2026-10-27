@@ -24,11 +24,11 @@
                       "Entity": "FactSales"
                     }
                   },
-                  "Property": "Rows Loaded"
+                  "Property": "Rows Loaded Display"
                 }
               },
-              "queryRef": "FactSales.Rows Loaded",
-              "nativeQueryRef": "Rows Loaded"
+              "queryRef": "FactSales.Rows Loaded Display",
+              "nativeQueryRef": "Rows Loaded Display"
             }
           ]
         }
@@ -59,7 +59,14 @@
             "labelDisplayUnits": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "1D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
                 }
               }
             }

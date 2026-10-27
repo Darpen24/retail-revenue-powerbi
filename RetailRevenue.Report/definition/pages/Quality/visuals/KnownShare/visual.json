@@ -24,11 +24,11 @@
                       "Entity": "FactSales"
                     }
                   },
-                  "Property": "Identified Sales Share"
+                  "Property": "Identified Sales Share Display"
                 }
               },
-              "queryRef": "FactSales.Identified Sales Share",
-              "nativeQueryRef": "Identified Sales Share"
+              "queryRef": "FactSales.Identified Sales Share Display",
+              "nativeQueryRef": "Identified Sales Share Display"
             }
           ]
         }
@@ -59,7 +59,14 @@
             "labelDisplayUnits": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "1D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
                 }
               }
             }

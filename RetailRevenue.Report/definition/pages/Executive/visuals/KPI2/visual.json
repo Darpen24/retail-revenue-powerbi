@@ -24,11 +24,11 @@
                       "Entity": "FactSales"
                     }
                   },
-                  "Property": "Average Order Value"
+                  "Property": "Average Order Value Display"
                 }
               },
-              "queryRef": "FactSales.Average Order Value",
-              "nativeQueryRef": "Average Order Value"
+              "queryRef": "FactSales.Average Order Value Display",
+              "nativeQueryRef": "Average Order Value Display"
             }
           ]
         }
@@ -59,7 +59,14 @@
             "labelDisplayUnits": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "1D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
                 }
               }
             }

@@ -1,0 +1,26 @@
+{
+  "name": "Retail Teal",
+  "dataColors": [
+    "#395C8A",
+    "#0D9488",
+    "#D69531",
+    "#8AA5B6"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#193347",
+  "tableAccent": "#0D9488",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 11
+    },
+    "callout": {
+      "fontFace": "Segoe UI",
+      "fontSize": 31
+    },
+    "title": {
+      "fontFace": "Segoe UI",
+      "fontSize": 14
+    }
+  }
+}

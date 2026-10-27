@@ -4,14 +4,13 @@
   "position": {
     "x": 708,
     "y": 600,
-    "width": 338,
-    "height": 228,
     "z": 20,
+    "height": 228,
+    "width": 338,
     "tabOrder": 20
   },
   "visual": {
     "visualType": "slicer",
-    "drillFilterOtherVisuals": true,
     "query": {
       "queryState": {
         "Values": {
@@ -28,7 +27,8 @@
                 }
               },
               "queryRef": "DimDate.MonthName",
-              "nativeQueryRef": "MonthName"
+              "nativeQueryRef": "MonthName",
+              "active": true
             }
           ]
         }
@@ -46,6 +46,11 @@
               }
             }
           }
+        }
+      ],
+      "general": [
+        {
+          "properties": {}
         }
       ]
     },
@@ -159,6 +164,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

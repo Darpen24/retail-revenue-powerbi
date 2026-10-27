@@ -3,9 +3,9 @@
   "name": "Audit1Label",
   "position": {
     "x": 394,
-    "y": 126,
+    "y": 123,
     "width": 302,
-    "height": 24,
+    "height": 40,
     "z": 25,
     "tabOrder": 25
   },
@@ -60,7 +60,7 @@
             "transparency": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "100D"
                 }
               }
             }

@@ -24,11 +24,11 @@
                       "Entity": "FactSales"
                     }
                   },
-                  "Property": "Orders"
+                  "Property": "Orders Display"
                 }
               },
-              "queryRef": "FactSales.Orders",
-              "nativeQueryRef": "Orders"
+              "queryRef": "FactSales.Orders Display",
+              "nativeQueryRef": "Orders Display"
             }
           ]
         }
@@ -59,7 +59,14 @@
             "labelDisplayUnits": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "1D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
                 }
               }
             }

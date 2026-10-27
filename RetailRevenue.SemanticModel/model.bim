@@ -1,9 +1,109 @@
 {
-  "name": "RetailRevenue",
-  "compatibilityLevel": 1600,
+  "compatibilityLevel": 1606,
   "model": {
+    "annotations": [
+      {
+        "name": "PBI_QueryOrder",
+        "value": "[\"SourceFile\", \"RawRetail\", \"PreparedRetail\", \"ScopedRetail\", \"FactSales\", \"DimDate\", \"DimCountry\", \"DimProduct\", \"QualityAudit\"]"
+      },
+      {
+        "name": "__PBI_TimeIntelligenceEnabled",
+        "value": "0"
+      },
+      {
+        "name": "PBI_ProTooling",
+        "value": "[\"DevMode\"]"
+      }
+    ],
     "culture": "en-GB",
+    "dataAccessOptions": {
+      "legacyRedirects": true,
+      "returnErrorValuesAsNull": true
+    },
     "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "expressions": [
+      {
+        "name": "SourceFile",
+        "annotations": [
+          {
+            "name": "PBI_ResultType",
+            "value": "Text"
+          }
+        ],
+        "expression": "\"C:\\Users\\Darpen\\Documents\\Codex\\2026-10-13\\t\\outputs\\retail-revenue-powerbi\\data\\raw\\Online Retail.xlsx\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]",
+        "kind": "m",
+        "lineageTag": "e712a450-9b5a-4ce8-9830-4933bc8fa5ed"
+      },
+      {
+        "name": "RawRetail",
+        "expression": [
+          "let",
+          "    Workbook = Excel.Workbook(File.Contents(SourceFile), null, true),",
+          "    Sheet = Workbook{[Item=\"Online Retail\", Kind=\"Sheet\"]}[Data],",
+          "    Headers = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),",
+          "    Typed = Table.TransformColumnTypes(Headers, {{\"InvoiceNo\", type text}, {\"StockCode\", type text}, {\"Description\", type text}, {\"Quantity\", Int64.Type}, {\"InvoiceDate\", type datetime}, {\"UnitPrice\", Currency.Type}, {\"CustomerID\", type text}, {\"Country\", type text}}, \"en-GB\")",
+          "in",
+          "    Typed"
+        ],
+        "kind": "m",
+        "lineageTag": "94ca75ee-a8d0-4f09-b3cd-e83cf8ab57d1"
+      },
+      {
+        "name": "PreparedRetail",
+        "expression": [
+          "let",
+          "    Source = RawRetail,",
+          "    Trimmed = Table.TransformColumns(Source, {{\"InvoiceNo\", each if _ = null then \"\" else Text.Upper(Text.Trim(Text.Clean(_))), type text}, {\"StockCode\", each if _ = null then \"\" else Text.Upper(Text.Trim(Text.Clean(_))), type text}, {\"Country\", each if _ = null or Text.Trim(_) = \"\" then \"Unknown\" else Text.Trim(Text.Clean(_)), type text}, {\"Description\", each if _ = null or Text.Trim(_) = \"\" then \"Unlabelled item\" else Text.Trim(Text.Clean(_)), type text}, {\"CustomerID\", each if _ = null or Text.Trim(_) = \"\" then \"Unknown\" else Text.Trim(_), type text}}),",
+          "    WithStatus = Table.AddColumn(Trimmed, \"ValidationStatus\", each",
+          "        if [InvoiceNo] = \"\" or [StockCode] = \"\" or [InvoiceDate] = null then \"Missing key/date\"",
+          "        else if [UnitPrice] = null or [UnitPrice] <= 0 then \"Non-positive price\"",
+          "        else if [Quantity] = null or [Quantity] = 0 then \"Zero/missing quantity\"",
+          "        else if Text.StartsWith([InvoiceNo], \"C\") and [Quantity] > 0 then \"Cancellation sign mismatch\"",
+          "        else \"Valid\", type text)",
+          "in",
+          "    WithStatus"
+        ],
+        "kind": "m",
+        "lineageTag": "bca8c69f-7c44-44e7-81f4-7a4fcc6017f0"
+      },
+      {
+        "name": "ScopedRetail",
+        "expression": [
+          "let",
+          "    Valid = Table.SelectRows(PreparedRetail, each [ValidationStatus] = \"Valid\"),",
+          "    OriginalFields = Table.RemoveColumns(Valid, {\"ValidationStatus\"}),",
+          "    Deduplicated = Table.Distinct(Table.Buffer(OriginalFields)),",
+          "    CompleteMonths = Table.SelectRows(Deduplicated, each [InvoiceDate] >= #datetime(2011,1,1,0,0,0) and [InvoiceDate] < #datetime(2011,12,1,0,0,0))",
+          "in",
+          "    CompleteMonths"
+        ],
+        "kind": "m",
+        "lineageTag": "3f04623c-a15d-4cdf-a5e3-983afc2fc8dd"
+      }
+    ],
+    "relationships": [
+      {
+        "name": "b2a7a790-2d60-45da-baea-d3d0b21c1acd",
+        "fromColumn": "Date",
+        "fromTable": "FactSales",
+        "toColumn": "Date",
+        "toTable": "DimDate"
+      },
+      {
+        "name": "945bebbe-ea07-4d0e-bf85-4af4c154bce3",
+        "fromColumn": "Country",
+        "fromTable": "FactSales",
+        "toColumn": "Country",
+        "toTable": "DimCountry"
+      },
+      {
+        "name": "033251e9-75dd-4cce-862c-fc6adb44c26a",
+        "fromColumn": "StockCode",
+        "fromTable": "FactSales",
+        "toColumn": "StockCode",
+        "toTable": "DimProduct"
+      }
+    ],
     "sourceQueryCulture": "en-GB",
     "tables": [
       {
@@ -12,73 +112,234 @@
           {
             "name": "InvoiceNo",
             "dataType": "string",
+            "lineageTag": "ce2d5347-a981-4654-a429-c25465fc1303",
             "sourceColumn": "InvoiceNo",
             "summarizeBy": "none"
           },
           {
             "name": "StockCode",
             "dataType": "string",
+            "lineageTag": "d1aeb812-f9a2-4c74-ab71-cd88ed1ec35e",
             "sourceColumn": "StockCode",
             "summarizeBy": "none"
           },
           {
             "name": "CustomerKey",
             "dataType": "string",
+            "lineageTag": "c7257d32-f12a-4a69-b4c0-4b44bb53c0d7",
             "sourceColumn": "CustomerKey",
             "summarizeBy": "none"
           },
           {
             "name": "Country",
             "dataType": "string",
+            "lineageTag": "4ed90d8c-9f38-4876-8b14-fcf117382c9c",
             "sourceColumn": "Country",
             "summarizeBy": "none"
           },
           {
             "name": "Date",
+            "annotations": [
+              {
+                "name": "UnderlyingDateTimeDataType",
+                "value": "Date"
+              }
+            ],
             "dataType": "dateTime",
+            "formatString": "Short Date",
+            "lineageTag": "73044a54-24a4-4797-a38a-58099d02e6ef",
             "sourceColumn": "Date",
-            "summarizeBy": "none",
-            "formatString": "Short Date"
+            "summarizeBy": "none"
           },
           {
             "name": "Quantity",
             "dataType": "int64",
+            "lineageTag": "9cb937b9-026b-4555-a193-dd3e1f08d373",
             "sourceColumn": "Quantity",
             "summarizeBy": "none"
           },
           {
             "name": "UnitPrice",
             "dataType": "decimal",
+            "isHidden": true,
+            "lineageTag": "bf7677b0-a370-4e9f-a8a4-51c9b214763f",
             "sourceColumn": "UnitPrice",
-            "summarizeBy": "none",
-            "isHidden": true
+            "summarizeBy": "none"
           },
           {
             "name": "LineType",
             "dataType": "string",
+            "lineageTag": "ca235b05-c346-4a06-819b-6d8c32bb0c12",
             "sourceColumn": "LineType",
             "summarizeBy": "none"
           },
           {
             "name": "GrossValue",
             "dataType": "decimal",
+            "isHidden": true,
+            "lineageTag": "73715b10-a52d-4906-a37a-d8e52161dc9e",
             "sourceColumn": "GrossValue",
-            "summarizeBy": "none",
-            "isHidden": true
+            "summarizeBy": "none"
           },
           {
             "name": "CreditValue",
             "dataType": "decimal",
+            "isHidden": true,
+            "lineageTag": "e4888db1-6ef2-4d19-b913-89947258d8d1",
             "sourceColumn": "CreditValue",
-            "summarizeBy": "none",
-            "isHidden": true
+            "summarizeBy": "none"
           },
           {
             "name": "NetValue",
             "dataType": "decimal",
+            "isHidden": true,
+            "lineageTag": "7f4ab782-5256-4324-a023-1b69a90771e4",
             "sourceColumn": "NetValue",
-            "summarizeBy": "none",
-            "isHidden": true
+            "summarizeBy": "none"
+          }
+        ],
+        "lineageTag": "3919c711-30b2-4227-8fa0-cd05fe6dff83",
+        "measures": [
+          {
+            "name": "Gross Sales",
+            "displayFolder": "Business KPIs",
+            "expression": "SUM(FactSales[GrossValue])",
+            "formatString": "£#,0; (£#,0); £0",
+            "lineageTag": "dceaecb4-f327-4de8-bb21-ea541abc7a27"
+          },
+          {
+            "name": "Credit Value",
+            "displayFolder": "Business KPIs",
+            "expression": "SUM(FactSales[CreditValue])",
+            "formatString": "£#,0; (£#,0); £0",
+            "lineageTag": "eb838bce-0d1b-4b5c-8a8f-753b8f448877"
+          },
+          {
+            "name": "Net Sales",
+            "displayFolder": "Business KPIs",
+            "expression": "[Gross Sales] - [Credit Value]",
+            "formatString": "£#,0; (£#,0); £0",
+            "lineageTag": "8ee0ba37-d970-41a5-84b1-ea3210c06578"
+          },
+          {
+            "name": "Orders",
+            "displayFolder": "Business KPIs",
+            "expression": "CALCULATE(DISTINCTCOUNT(FactSales[InvoiceNo]), FactSales[LineType] = \"Sale\")",
+            "formatString": "#,0",
+            "lineageTag": "472b2215-e5de-42ec-bb01-faa5b38e6805"
+          },
+          {
+            "name": "Average Order Value",
+            "displayFolder": "Business KPIs",
+            "expression": "DIVIDE([Gross Sales], [Orders])",
+            "formatString": "£#,0.00",
+            "lineageTag": "608c9924-526d-4aca-8fb1-0ae3d95b539a"
+          },
+          {
+            "name": "Known Customers",
+            "displayFolder": "Business KPIs",
+            "expression": "CALCULATE(DISTINCTCOUNT(FactSales[CustomerKey]), FactSales[CustomerKey] <> \"Unknown\", FactSales[LineType] = \"Sale\")",
+            "formatString": "#,0",
+            "lineageTag": "d2d3c60b-c974-4f38-9fe6-c749a5c5ca4e"
+          },
+          {
+            "name": "Credit Value Ratio",
+            "displayFolder": "Business KPIs",
+            "expression": "DIVIDE([Credit Value], [Gross Sales])",
+            "formatString": "0.0%",
+            "lineageTag": "d97a65a2-5105-41d2-b1dc-b0dad1b87779"
+          },
+          {
+            "name": "Identified Sales Share",
+            "displayFolder": "Business KPIs",
+            "expression": "DIVIDE(CALCULATE([Gross Sales], FactSales[CustomerKey] <> \"Unknown\"), [Gross Sales])",
+            "formatString": "0.0%",
+            "lineageTag": "a4ee772b-8d5e-4966-a739-d04a1c9cf0a9"
+          },
+          {
+            "name": "Units Sold",
+            "displayFolder": "Business KPIs",
+            "expression": "CALCULATE(SUM(FactSales[Quantity]), FactSales[LineType] = \"Sale\")",
+            "formatString": "#,0",
+            "lineageTag": "f6e0a635-64aa-4bc0-89d1-630573b0d36f"
+          },
+          {
+            "name": "Source Rows",
+            "displayFolder": "Quality",
+            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"01 Source rows\")",
+            "formatString": "#,0",
+            "lineageTag": "3c1a0bb8-8a61-4cd1-a7d5-0c4c51323964"
+          },
+          {
+            "name": "Invalid Rows",
+            "displayFolder": "Quality",
+            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"02 Invalid rows excluded\")",
+            "formatString": "#,0",
+            "lineageTag": "21f41bea-6a70-439b-80f2-f5fcb76da51a"
+          },
+          {
+            "name": "Duplicates Removed",
+            "displayFolder": "Quality",
+            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"03 Exact duplicates removed\")",
+            "formatString": "#,0",
+            "lineageTag": "0305ca2e-50fd-4f2d-84fe-97957d46717b"
+          },
+          {
+            "name": "Rows Loaded",
+            "displayFolder": "Quality",
+            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"05 Rows loaded\")",
+            "formatString": "#,0",
+            "lineageTag": "99432a5d-20a5-4c13-988e-748021f75899"
+          },
+          {
+            "name": "Net Sales Display",
+            "displayFolder": "Presentation only",
+            "expression": "\"£\" & FORMAT(DIVIDE([Net Sales], 1000000), \"0.00\", \"en-GB\") & \"m\""
+          },
+          {
+            "name": "Orders Display",
+            "displayFolder": "Presentation only",
+            "expression": "FORMAT([Orders], \"#,##0\", \"en-GB\")"
+          },
+          {
+            "name": "Average Order Value Display",
+            "displayFolder": "Presentation only",
+            "expression": "\"£\" & FORMAT([Average Order Value], \"0.00\", \"en-GB\")"
+          },
+          {
+            "name": "Known Customers Display",
+            "displayFolder": "Presentation only",
+            "expression": "FORMAT([Known Customers], \"#,##0\", \"en-GB\")"
+          },
+          {
+            "name": "Credit Value Ratio Display",
+            "displayFolder": "Presentation only",
+            "expression": "FORMAT([Credit Value Ratio], \"0.00%\", \"en-GB\")"
+          },
+          {
+            "name": "Source Rows Display",
+            "displayFolder": "Presentation only",
+            "expression": "FORMAT([Source Rows], \"#,##0\", \"en-GB\")"
+          },
+          {
+            "name": "Invalid Rows Display",
+            "displayFolder": "Presentation only",
+            "expression": "FORMAT([Invalid Rows], \"#,##0\", \"en-GB\")"
+          },
+          {
+            "name": "Duplicates Removed Display",
+            "displayFolder": "Presentation only",
+            "expression": "FORMAT([Duplicates Removed], \"#,##0\", \"en-GB\")"
+          },
+          {
+            "name": "Rows Loaded Display",
+            "displayFolder": "Presentation only",
+            "expression": "FORMAT([Rows Loaded], \"#,##0\", \"en-GB\")"
+          },
+          {
+            "name": "Identified Sales Share Display",
+            "displayFolder": "Presentation only",
+            "expression": "FORMAT([Identified Sales Share], \"0.00%\", \"en-GB\")"
           }
         ],
         "partitions": [
@@ -86,7 +347,6 @@
             "name": "FactSales",
             "mode": "import",
             "source": {
-              "type": "m",
               "expression": [
                 "let",
                 "    Source = ScopedRetail,",
@@ -99,88 +359,9 @@
                 "    Selected = Table.SelectColumns(Renamed, {\"InvoiceNo\", \"StockCode\", \"CustomerKey\", \"Country\", \"Date\", \"Quantity\", \"UnitPrice\", \"LineType\", \"GrossValue\", \"CreditValue\", \"NetValue\"})",
                 "in",
                 "    Selected"
-              ]
+              ],
+              "type": "m"
             }
-          }
-        ],
-        "measures": [
-          {
-            "name": "Gross Sales",
-            "expression": "SUM(FactSales[GrossValue])",
-            "formatString": "£#,0; (£#,0); £0",
-            "displayFolder": "Business KPIs"
-          },
-          {
-            "name": "Credit Value",
-            "expression": "SUM(FactSales[CreditValue])",
-            "formatString": "£#,0; (£#,0); £0",
-            "displayFolder": "Business KPIs"
-          },
-          {
-            "name": "Net Sales",
-            "expression": "[Gross Sales] - [Credit Value]",
-            "formatString": "£#,0; (£#,0); £0",
-            "displayFolder": "Business KPIs"
-          },
-          {
-            "name": "Orders",
-            "expression": "CALCULATE(DISTINCTCOUNT(FactSales[InvoiceNo]), FactSales[LineType] = \"Sale\")",
-            "formatString": "#,0",
-            "displayFolder": "Business KPIs"
-          },
-          {
-            "name": "Average Order Value",
-            "expression": "DIVIDE([Gross Sales], [Orders])",
-            "formatString": "£#,0.00",
-            "displayFolder": "Business KPIs"
-          },
-          {
-            "name": "Known Customers",
-            "expression": "CALCULATE(DISTINCTCOUNT(FactSales[CustomerKey]), FactSales[CustomerKey] <> \"Unknown\", FactSales[LineType] = \"Sale\")",
-            "formatString": "#,0",
-            "displayFolder": "Business KPIs"
-          },
-          {
-            "name": "Credit Value Ratio",
-            "expression": "DIVIDE([Credit Value], [Gross Sales])",
-            "formatString": "0.0%",
-            "displayFolder": "Business KPIs"
-          },
-          {
-            "name": "Identified Sales Share",
-            "expression": "DIVIDE(CALCULATE([Gross Sales], FactSales[CustomerKey] <> \"Unknown\"), [Gross Sales])",
-            "formatString": "0.0%",
-            "displayFolder": "Business KPIs"
-          },
-          {
-            "name": "Units Sold",
-            "expression": "CALCULATE(SUM(FactSales[Quantity]), FactSales[LineType] = \"Sale\")",
-            "formatString": "#,0",
-            "displayFolder": "Business KPIs"
-          },
-          {
-            "name": "Source Rows",
-            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"01 Source rows\")",
-            "formatString": "#,0",
-            "displayFolder": "Quality"
-          },
-          {
-            "name": "Invalid Rows",
-            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"02 Invalid rows excluded\")",
-            "formatString": "#,0",
-            "displayFolder": "Quality"
-          },
-          {
-            "name": "Duplicates Removed",
-            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"03 Exact duplicates removed\")",
-            "formatString": "#,0",
-            "displayFolder": "Quality"
-          },
-          {
-            "name": "Rows Loaded",
-            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"05 Rows loaded\")",
-            "formatString": "#,0",
-            "displayFolder": "Quality"
           }
         ]
       },
@@ -189,37 +370,47 @@
         "columns": [
           {
             "name": "Date",
+            "annotations": [
+              {
+                "name": "UnderlyingDateTimeDataType",
+                "value": "Date"
+              }
+            ],
             "dataType": "dateTime",
+            "formatString": "Short Date",
+            "lineageTag": "23ab1f88-e61d-453c-a5f4-6f3dedd70602",
             "sourceColumn": "Date",
-            "summarizeBy": "none",
-            "formatString": "Short Date"
+            "summarizeBy": "none"
           },
           {
             "name": "Month",
             "dataType": "string",
+            "lineageTag": "74ad5f16-3711-4f9f-88bd-bbb8009c2ec2",
             "sourceColumn": "Month",
             "summarizeBy": "none"
           },
           {
             "name": "MonthName",
             "dataType": "string",
+            "lineageTag": "e9b8f858-35e4-4344-8d74-a0d72971654e",
+            "sortByColumn": "MonthNo",
             "sourceColumn": "MonthName",
-            "summarizeBy": "none",
-            "sortByColumn": "MonthNo"
+            "summarizeBy": "none"
           },
           {
             "name": "MonthNo",
             "dataType": "int64",
+            "lineageTag": "a37aecc1-424b-4f62-b1cf-08fdc7e5b0b7",
             "sourceColumn": "MonthNo",
             "summarizeBy": "none"
           }
         ],
+        "lineageTag": "c66049b8-1455-4dce-b8d8-7b4d8967e979",
         "partitions": [
           {
             "name": "DimDate",
             "mode": "import",
             "source": {
-              "type": "m",
               "expression": [
                 "let",
                 "    Dates = Table.FromList(List.Dates(#date(2011,1,1), 334, #duration(1,0,0,0)), Splitter.SplitByNothing(), {\"Date\"}),",
@@ -229,7 +420,8 @@
                 "    MonthNo = Table.AddColumn(MonthName, \"MonthNo\", each Date.Month([Date]), Int64.Type)",
                 "in",
                 "    MonthNo"
-              ]
+              ],
+              "type": "m"
             }
           }
         ]
@@ -240,29 +432,32 @@
           {
             "name": "Country",
             "dataType": "string",
+            "lineageTag": "dbd5ab54-e9d0-4f38-a8b7-30d5daa60751",
             "sourceColumn": "Country",
             "summarizeBy": "none"
           },
           {
             "name": "Market",
             "dataType": "string",
+            "lineageTag": "11c79e86-ff7c-416d-bc1a-8ccffae82069",
             "sourceColumn": "Market",
             "summarizeBy": "none"
           }
         ],
+        "lineageTag": "94301071-f5d5-4f9c-a12e-ae7b143b3224",
         "partitions": [
           {
             "name": "DimCountry",
             "mode": "import",
             "source": {
-              "type": "m",
               "expression": [
                 "let",
                 "    Countries = Table.Distinct(Table.SelectColumns(ScopedRetail, {\"Country\"})),",
                 "    Market = Table.AddColumn(Countries, \"Market\", each if [Country] = \"United Kingdom\" then \"United Kingdom\" else \"International\", type text)",
                 "in",
                 "    Market"
-              ]
+              ],
+              "type": "m"
             }
           }
         ]
@@ -273,29 +468,32 @@
           {
             "name": "StockCode",
             "dataType": "string",
+            "lineageTag": "6a3b8e48-5982-4e85-af38-47db06855f12",
             "sourceColumn": "StockCode",
             "summarizeBy": "none"
           },
           {
             "name": "Product",
             "dataType": "string",
+            "lineageTag": "2c1ee35a-44ca-4b43-9b58-84e19a3430c4",
             "sourceColumn": "Product",
             "summarizeBy": "none"
           }
         ],
+        "lineageTag": "ffe9bbf5-ac37-47c8-ac0a-63e26de31af7",
         "partitions": [
           {
             "name": "DimProduct",
             "mode": "import",
             "source": {
-              "type": "m",
               "expression": [
                 "let",
                 "    Pairs = Table.SelectColumns(ScopedRetail, {\"StockCode\", \"Description\"}),",
                 "    Grouped = Table.Group(Pairs, {\"StockCode\"}, {{\"Product\", each List.First(List.Sort(List.Distinct([Description]))), type text}})",
                 "in",
                 "    Grouped"
-              ]
+              ],
+              "type": "m"
             }
           }
         ]
@@ -306,22 +504,24 @@
           {
             "name": "Step",
             "dataType": "string",
+            "lineageTag": "2a83d5a5-f81c-490a-8a2f-4e0cf53d9365",
             "sourceColumn": "Step",
             "summarizeBy": "none"
           },
           {
             "name": "Rows",
             "dataType": "int64",
+            "lineageTag": "cbef1d95-9628-42ad-90a8-17e4d2b7affc",
             "sourceColumn": "Rows",
             "summarizeBy": "none"
           }
         ],
+        "lineageTag": "8f397ddb-ddb5-48c5-ab7a-9261c9af1498",
         "partitions": [
           {
             "name": "QualityAudit",
             "mode": "import",
             "source": {
-              "type": "m",
               "expression": [
                 "let",
                 "    Raw = Table.Buffer(RawRetail),",
@@ -339,98 +539,11 @@
                 "    })",
                 "in",
                 "    Audit"
-              ]
+              ],
+              "type": "m"
             }
           }
         ]
-      }
-    ],
-    "relationships": [
-      {
-        "name": "b2a7a790-2d60-45da-baea-d3d0b21c1acd",
-        "fromTable": "FactSales",
-        "fromColumn": "Date",
-        "toTable": "DimDate",
-        "toColumn": "Date",
-        "crossFilteringBehavior": "oneDirection"
-      },
-      {
-        "name": "945bebbe-ea07-4d0e-bf85-4af4c154bce3",
-        "fromTable": "FactSales",
-        "fromColumn": "Country",
-        "toTable": "DimCountry",
-        "toColumn": "Country",
-        "crossFilteringBehavior": "oneDirection"
-      },
-      {
-        "name": "033251e9-75dd-4cce-862c-fc6adb44c26a",
-        "fromTable": "FactSales",
-        "fromColumn": "StockCode",
-        "toTable": "DimProduct",
-        "toColumn": "StockCode",
-        "crossFilteringBehavior": "oneDirection"
-      }
-    ],
-    "expressions": [
-      {
-        "name": "SourceFile",
-        "kind": "m",
-        "expression": [
-          "\"C:\\Users\\Darpen\\Documents\\Codex\\2026-10-13\\t\\outputs\\retail-revenue-powerbi\\data\\raw\\Online Retail.xlsx\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]"
-        ]
-      },
-      {
-        "name": "RawRetail",
-        "kind": "m",
-        "expression": [
-          "let",
-          "    Workbook = Excel.Workbook(File.Contents(SourceFile), null, true),",
-          "    Sheet = Workbook{[Item=\"Online Retail\", Kind=\"Sheet\"]}[Data],",
-          "    Headers = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),",
-          "    Typed = Table.TransformColumnTypes(Headers, {{\"InvoiceNo\", type text}, {\"StockCode\", type text}, {\"Description\", type text}, {\"Quantity\", Int64.Type}, {\"InvoiceDate\", type datetime}, {\"UnitPrice\", Currency.Type}, {\"CustomerID\", type text}, {\"Country\", type text}}, \"en-GB\")",
-          "in",
-          "    Typed"
-        ]
-      },
-      {
-        "name": "PreparedRetail",
-        "kind": "m",
-        "expression": [
-          "let",
-          "    Source = RawRetail,",
-          "    Trimmed = Table.TransformColumns(Source, {{\"InvoiceNo\", each if _ = null then \"\" else Text.Upper(Text.Trim(Text.Clean(_))), type text}, {\"StockCode\", each if _ = null then \"\" else Text.Upper(Text.Trim(Text.Clean(_))), type text}, {\"Country\", each if _ = null or Text.Trim(_) = \"\" then \"Unknown\" else Text.Trim(Text.Clean(_)), type text}, {\"Description\", each if _ = null or Text.Trim(_) = \"\" then \"Unlabelled item\" else Text.Trim(Text.Clean(_)), type text}, {\"CustomerID\", each if _ = null or Text.Trim(_) = \"\" then \"Unknown\" else Text.Trim(_), type text}}),",
-          "    WithStatus = Table.AddColumn(Trimmed, \"ValidationStatus\", each",
-          "        if [InvoiceNo] = \"\" or [StockCode] = \"\" or [InvoiceDate] = null then \"Missing key/date\"",
-          "        else if [UnitPrice] = null or [UnitPrice] <= 0 then \"Non-positive price\"",
-          "        else if [Quantity] = null or [Quantity] = 0 then \"Zero/missing quantity\"",
-          "        else if Text.StartsWith([InvoiceNo], \"C\") and [Quantity] > 0 then \"Cancellation sign mismatch\"",
-          "        else \"Valid\", type text)",
-          "in",
-          "    WithStatus"
-        ]
-      },
-      {
-        "name": "ScopedRetail",
-        "kind": "m",
-        "expression": [
-          "let",
-          "    Valid = Table.SelectRows(PreparedRetail, each [ValidationStatus] = \"Valid\"),",
-          "    OriginalFields = Table.RemoveColumns(Valid, {\"ValidationStatus\"}),",
-          "    Deduplicated = Table.Distinct(Table.Buffer(OriginalFields)),",
-          "    CompleteMonths = Table.SelectRows(Deduplicated, each [InvoiceDate] >= #datetime(2011,1,1,0,0,0) and [InvoiceDate] < #datetime(2011,12,1,0,0,0))",
-          "in",
-          "    CompleteMonths"
-        ]
-      }
-    ],
-    "annotations": [
-      {
-        "name": "PBI_QueryOrder",
-        "value": "[\"SourceFile\", \"RawRetail\", \"PreparedRetail\", \"ScopedRetail\", \"FactSales\", \"DimDate\", \"DimCountry\", \"DimProduct\", \"QualityAudit\"]"
-      },
-      {
-        "name": "__PBI_TimeIntelligenceEnabled",
-        "value": "0"
       }
     ]
   }

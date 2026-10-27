@@ -24,11 +24,11 @@
                       "Entity": "FactSales"
                     }
                   },
-                  "Property": "Duplicates Removed"
+                  "Property": "Duplicates Removed Display"
                 }
               },
-              "queryRef": "FactSales.Duplicates Removed",
-              "nativeQueryRef": "Duplicates Removed"
+              "queryRef": "FactSales.Duplicates Removed Display",
+              "nativeQueryRef": "Duplicates Removed Display"
             }
           ]
         }
@@ -59,7 +59,14 @@
             "labelDisplayUnits": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "1D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
                 }
               }
             }

@@ -24,11 +24,11 @@
                       "Entity": "FactSales"
                     }
                   },
-                  "Property": "Credit Value Ratio"
+                  "Property": "Credit Value Ratio Display"
                 }
               },
-              "queryRef": "FactSales.Credit Value Ratio",
-              "nativeQueryRef": "Credit Value Ratio"
+              "queryRef": "FactSales.Credit Value Ratio Display",
+              "nativeQueryRef": "Credit Value Ratio Display"
             }
           ]
         }
@@ -59,7 +59,14 @@
             "labelDisplayUnits": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "1D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
                 }
               }
             }
