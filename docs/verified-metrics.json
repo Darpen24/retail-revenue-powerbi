@@ -1,0 +1,104 @@
+{
+  "source_sha256": "43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d",
+  "period": "2011-01-01 to 2011-11-30",
+  "currency": "GBP",
+  "audit": {
+    "source_rows": 541909,
+    "invalid_rows": 2517,
+    "duplicates_removed": 5263,
+    "outside_period": 66902,
+    "rows_loaded": 467227,
+    "unknown_customer_rows": 109396
+  },
+  "kpis": {
+    "gross_sales": 9182867.74,
+    "credit_value": 614161.34,
+    "net_sales": 8568706.4,
+    "orders": 17582,
+    "aov": 522.29,
+    "known_customers": 4173,
+    "credit_value_ratio": 0.06688121370377868,
+    "identified_sales_share": 0.8493638307157569
+  },
+  "monthly": [
+    {
+      "Month": "2011-01",
+      "GrossValue": 689811.61,
+      "CreditValue": 131363.05000000002,
+      "NetValue": 558448.5599999999
+    },
+    {
+      "Month": "2011-02",
+      "GrossValue": 522545.56,
+      "CreditValue": 25519.15,
+      "NetValue": 497026.41
+    },
+    {
+      "Month": "2011-03",
+      "GrossValue": 716215.26,
+      "CreditValue": 34201.28,
+      "NetValue": 682013.98
+    },
+    {
+      "Month": "2011-04",
+      "GrossValue": 536968.491,
+      "CreditValue": 44600.65,
+      "NetValue": 492367.841
+    },
+    {
+      "Month": "2011-05",
+      "GrossValue": 769296.61,
+      "CreditValue": 47202.51,
+      "NetValue": 722094.1
+    },
+    {
+      "Month": "2011-06",
+      "GrossValue": 760547.01,
+      "CreditValue": 70569.78,
+      "NetValue": 689977.23
+    },
+    {
+      "Month": "2011-07",
+      "GrossValue": 718076.121,
+      "CreditValue": 37919.13,
+      "NetValue": 680156.991
+    },
+    {
+      "Month": "2011-08",
+      "GrossValue": 757841.38,
+      "CreditValue": 54330.8,
+      "NetValue": 703510.58
+    },
+    {
+      "Month": "2011-09",
+      "GrossValue": 1056435.192,
+      "CreditValue": 38838.51,
+      "NetValue": 1017596.682
+    },
+    {
+      "Month": "2011-10",
+      "GrossValue": 1151263.73,
+      "CreditValue": 81895.5,
+      "NetValue": 1069368.23
+    },
+    {
+      "Month": "2011-11",
+      "GrossValue": 1503866.78,
+      "CreditValue": 47720.979999999996,
+      "NetValue": 1456145.8
+    }
+  ],
+  "top_countries": {
+    "United Kingdom": 7126867.96,
+    "Netherlands": 264149.04,
+    "EIRE": 246640.39,
+    "Germany": 199177.33,
+    "France": 180692.92,
+    "Australia": 136072.17,
+    "Switzerland": 55058.13,
+    "Spain": 52640.87,
+    "Belgium": 37691.62,
+    "Sweden": 33939.11
+  },
+  "uk_net_sales": 7126867.96
+}

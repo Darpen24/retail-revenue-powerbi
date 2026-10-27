@@ -1,0 +1,18 @@
+name: Portfolio QA
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Reconcile public workbook and KPI baseline
+        run: python scripts/verify_data.py --check
+      - name: Validate PBIR report definitions
+        run: python scripts/validate_report.py
