@@ -1,0 +1,437 @@
+{
+  "name": "RetailRevenue",
+  "compatibilityLevel": 1600,
+  "model": {
+    "culture": "en-GB",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "sourceQueryCulture": "en-GB",
+    "tables": [
+      {
+        "name": "FactSales",
+        "columns": [
+          {
+            "name": "InvoiceNo",
+            "dataType": "string",
+            "sourceColumn": "InvoiceNo",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "StockCode",
+            "dataType": "string",
+            "sourceColumn": "StockCode",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "CustomerKey",
+            "dataType": "string",
+            "sourceColumn": "CustomerKey",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Country",
+            "dataType": "string",
+            "sourceColumn": "Country",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Date",
+            "dataType": "dateTime",
+            "sourceColumn": "Date",
+            "summarizeBy": "none",
+            "formatString": "Short Date"
+          },
+          {
+            "name": "Quantity",
+            "dataType": "int64",
+            "sourceColumn": "Quantity",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "UnitPrice",
+            "dataType": "decimal",
+            "sourceColumn": "UnitPrice",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "LineType",
+            "dataType": "string",
+            "sourceColumn": "LineType",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "GrossValue",
+            "dataType": "decimal",
+            "sourceColumn": "GrossValue",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "CreditValue",
+            "dataType": "decimal",
+            "sourceColumn": "CreditValue",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "NetValue",
+            "dataType": "decimal",
+            "sourceColumn": "NetValue",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "partitions": [
+          {
+            "name": "FactSales",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = ScopedRetail,",
+                "    Date = Table.AddColumn(Source, \"Date\", each Date.From([InvoiceDate]), type date),",
+                "    Kind = Table.AddColumn(Date, \"LineType\", each if [Quantity] < 0 then \"Credit\" else \"Sale\", type text),",
+                "    Gross = Table.AddColumn(Kind, \"GrossValue\", each if [Quantity] > 0 then [Quantity] * [UnitPrice] else 0, Currency.Type),",
+                "    Credits = Table.AddColumn(Gross, \"CreditValue\", each if [Quantity] < 0 then -[Quantity] * [UnitPrice] else 0, Currency.Type),",
+                "    Net = Table.AddColumn(Credits, \"NetValue\", each [Quantity] * [UnitPrice], Currency.Type),",
+                "    Renamed = Table.RenameColumns(Net, {{\"CustomerID\", \"CustomerKey\"}}),",
+                "    Selected = Table.SelectColumns(Renamed, {\"InvoiceNo\", \"StockCode\", \"CustomerKey\", \"Country\", \"Date\", \"Quantity\", \"UnitPrice\", \"LineType\", \"GrossValue\", \"CreditValue\", \"NetValue\"})",
+                "in",
+                "    Selected"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Gross Sales",
+            "expression": "SUM(FactSales[GrossValue])",
+            "formatString": "£#,0; (£#,0); £0",
+            "displayFolder": "Business KPIs"
+          },
+          {
+            "name": "Credit Value",
+            "expression": "SUM(FactSales[CreditValue])",
+            "formatString": "£#,0; (£#,0); £0",
+            "displayFolder": "Business KPIs"
+          },
+          {
+            "name": "Net Sales",
+            "expression": "[Gross Sales] - [Credit Value]",
+            "formatString": "£#,0; (£#,0); £0",
+            "displayFolder": "Business KPIs"
+          },
+          {
+            "name": "Orders",
+            "expression": "CALCULATE(DISTINCTCOUNT(FactSales[InvoiceNo]), FactSales[LineType] = \"Sale\")",
+            "formatString": "#,0",
+            "displayFolder": "Business KPIs"
+          },
+          {
+            "name": "Average Order Value",
+            "expression": "DIVIDE([Gross Sales], [Orders])",
+            "formatString": "£#,0.00",
+            "displayFolder": "Business KPIs"
+          },
+          {
+            "name": "Known Customers",
+            "expression": "CALCULATE(DISTINCTCOUNT(FactSales[CustomerKey]), FactSales[CustomerKey] <> \"Unknown\", FactSales[LineType] = \"Sale\")",
+            "formatString": "#,0",
+            "displayFolder": "Business KPIs"
+          },
+          {
+            "name": "Credit Value Ratio",
+            "expression": "DIVIDE([Credit Value], [Gross Sales])",
+            "formatString": "0.0%",
+            "displayFolder": "Business KPIs"
+          },
+          {
+            "name": "Identified Sales Share",
+            "expression": "DIVIDE(CALCULATE([Gross Sales], FactSales[CustomerKey] <> \"Unknown\"), [Gross Sales])",
+            "formatString": "0.0%",
+            "displayFolder": "Business KPIs"
+          },
+          {
+            "name": "Units Sold",
+            "expression": "CALCULATE(SUM(FactSales[Quantity]), FactSales[LineType] = \"Sale\")",
+            "formatString": "#,0",
+            "displayFolder": "Business KPIs"
+          },
+          {
+            "name": "Source Rows",
+            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"01 Source rows\")",
+            "formatString": "#,0",
+            "displayFolder": "Quality"
+          },
+          {
+            "name": "Invalid Rows",
+            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"02 Invalid rows excluded\")",
+            "formatString": "#,0",
+            "displayFolder": "Quality"
+          },
+          {
+            "name": "Duplicates Removed",
+            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"03 Exact duplicates removed\")",
+            "formatString": "#,0",
+            "displayFolder": "Quality"
+          },
+          {
+            "name": "Rows Loaded",
+            "expression": "CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = \"05 Rows loaded\")",
+            "formatString": "#,0",
+            "displayFolder": "Quality"
+          }
+        ]
+      },
+      {
+        "name": "DimDate",
+        "columns": [
+          {
+            "name": "Date",
+            "dataType": "dateTime",
+            "sourceColumn": "Date",
+            "summarizeBy": "none",
+            "formatString": "Short Date"
+          },
+          {
+            "name": "Month",
+            "dataType": "string",
+            "sourceColumn": "Month",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "MonthName",
+            "dataType": "string",
+            "sourceColumn": "MonthName",
+            "summarizeBy": "none",
+            "sortByColumn": "MonthNo"
+          },
+          {
+            "name": "MonthNo",
+            "dataType": "int64",
+            "sourceColumn": "MonthNo",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "DimDate",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Dates = Table.FromList(List.Dates(#date(2011,1,1), 334, #duration(1,0,0,0)), Splitter.SplitByNothing(), {\"Date\"}),",
+                "    Typed = Table.TransformColumnTypes(Dates, {{\"Date\", type date}}),",
+                "    Month = Table.AddColumn(Typed, \"Month\", each Date.ToText([Date], \"yyyy-MM\"), type text),",
+                "    MonthName = Table.AddColumn(Month, \"MonthName\", each Date.ToText([Date], \"MMM\", \"en-GB\"), type text),",
+                "    MonthNo = Table.AddColumn(MonthName, \"MonthNo\", each Date.Month([Date]), Int64.Type)",
+                "in",
+                "    MonthNo"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "DimCountry",
+        "columns": [
+          {
+            "name": "Country",
+            "dataType": "string",
+            "sourceColumn": "Country",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Market",
+            "dataType": "string",
+            "sourceColumn": "Market",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "DimCountry",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Countries = Table.Distinct(Table.SelectColumns(ScopedRetail, {\"Country\"})),",
+                "    Market = Table.AddColumn(Countries, \"Market\", each if [Country] = \"United Kingdom\" then \"United Kingdom\" else \"International\", type text)",
+                "in",
+                "    Market"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "DimProduct",
+        "columns": [
+          {
+            "name": "StockCode",
+            "dataType": "string",
+            "sourceColumn": "StockCode",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Product",
+            "dataType": "string",
+            "sourceColumn": "Product",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "DimProduct",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Pairs = Table.SelectColumns(ScopedRetail, {\"StockCode\", \"Description\"}),",
+                "    Grouped = Table.Group(Pairs, {\"StockCode\"}, {{\"Product\", each List.First(List.Sort(List.Distinct([Description]))), type text}})",
+                "in",
+                "    Grouped"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "QualityAudit",
+        "columns": [
+          {
+            "name": "Step",
+            "dataType": "string",
+            "sourceColumn": "Step",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Rows",
+            "dataType": "int64",
+            "sourceColumn": "Rows",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "QualityAudit",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Raw = Table.Buffer(RawRetail),",
+                "    Prepared = Table.Buffer(PreparedRetail),",
+                "    Valid = Table.SelectRows(Prepared, each [ValidationStatus] = \"Valid\"),",
+                "    Unique = Table.Distinct(Table.Buffer(Table.RemoveColumns(Valid, {\"ValidationStatus\"}))),",
+                "    Scope = ScopedRetail,",
+                "    Audit = #table(type table [Step=text, Rows=Int64.Type], {",
+                "        {\"01 Source rows\", Table.RowCount(Raw)},",
+                "        {\"02 Invalid rows excluded\", Table.RowCount(Prepared) - Table.RowCount(Valid)},",
+                "        {\"03 Exact duplicates removed\", Table.RowCount(Valid) - Table.RowCount(Unique)},",
+                "        {\"04 Outside Jan-Nov 2011\", Table.RowCount(Unique) - Table.RowCount(Scope)},",
+                "        {\"05 Rows loaded\", Table.RowCount(Scope)},",
+                "        {\"06 Unidentified customer rows\", Table.RowCount(Table.SelectRows(Scope, each [CustomerID] = \"Unknown\"))}",
+                "    })",
+                "in",
+                "    Audit"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "b2a7a790-2d60-45da-baea-d3d0b21c1acd",
+        "fromTable": "FactSales",
+        "fromColumn": "Date",
+        "toTable": "DimDate",
+        "toColumn": "Date",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "945bebbe-ea07-4d0e-bf85-4af4c154bce3",
+        "fromTable": "FactSales",
+        "fromColumn": "Country",
+        "toTable": "DimCountry",
+        "toColumn": "Country",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "033251e9-75dd-4cce-862c-fc6adb44c26a",
+        "fromTable": "FactSales",
+        "fromColumn": "StockCode",
+        "toTable": "DimProduct",
+        "toColumn": "StockCode",
+        "crossFilteringBehavior": "oneDirection"
+      }
+    ],
+    "expressions": [
+      {
+        "name": "SourceFile",
+        "kind": "m",
+        "expression": [
+          "\"C:\\Users\\Darpen\\Documents\\Codex\\2026-10-13\\t\\outputs\\retail-revenue-powerbi\\data\\raw\\Online Retail.xlsx\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]"
+        ]
+      },
+      {
+        "name": "RawRetail",
+        "kind": "m",
+        "expression": [
+          "let",
+          "    Workbook = Excel.Workbook(File.Contents(SourceFile), null, true),",
+          "    Sheet = Workbook{[Item=\"Online Retail\", Kind=\"Sheet\"]}[Data],",
+          "    Headers = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),",
+          "    Typed = Table.TransformColumnTypes(Headers, {{\"InvoiceNo\", type text}, {\"StockCode\", type text}, {\"Description\", type text}, {\"Quantity\", Int64.Type}, {\"InvoiceDate\", type datetime}, {\"UnitPrice\", Currency.Type}, {\"CustomerID\", type text}, {\"Country\", type text}}, \"en-GB\")",
+          "in",
+          "    Typed"
+        ]
+      },
+      {
+        "name": "PreparedRetail",
+        "kind": "m",
+        "expression": [
+          "let",
+          "    Source = RawRetail,",
+          "    Trimmed = Table.TransformColumns(Source, {{\"InvoiceNo\", each if _ = null then \"\" else Text.Upper(Text.Trim(Text.Clean(_))), type text}, {\"StockCode\", each if _ = null then \"\" else Text.Upper(Text.Trim(Text.Clean(_))), type text}, {\"Country\", each if _ = null or Text.Trim(_) = \"\" then \"Unknown\" else Text.Trim(Text.Clean(_)), type text}, {\"Description\", each if _ = null or Text.Trim(_) = \"\" then \"Unlabelled item\" else Text.Trim(Text.Clean(_)), type text}, {\"CustomerID\", each if _ = null or Text.Trim(_) = \"\" then \"Unknown\" else Text.Trim(_), type text}}),",
+          "    WithStatus = Table.AddColumn(Trimmed, \"ValidationStatus\", each",
+          "        if [InvoiceNo] = \"\" or [StockCode] = \"\" or [InvoiceDate] = null then \"Missing key/date\"",
+          "        else if [UnitPrice] = null or [UnitPrice] <= 0 then \"Non-positive price\"",
+          "        else if [Quantity] = null or [Quantity] = 0 then \"Zero/missing quantity\"",
+          "        else if Text.StartsWith([InvoiceNo], \"C\") and [Quantity] > 0 then \"Cancellation sign mismatch\"",
+          "        else \"Valid\", type text)",
+          "in",
+          "    WithStatus"
+        ]
+      },
+      {
+        "name": "ScopedRetail",
+        "kind": "m",
+        "expression": [
+          "let",
+          "    Valid = Table.SelectRows(PreparedRetail, each [ValidationStatus] = \"Valid\"),",
+          "    OriginalFields = Table.RemoveColumns(Valid, {\"ValidationStatus\"}),",
+          "    Deduplicated = Table.Distinct(Table.Buffer(OriginalFields)),",
+          "    CompleteMonths = Table.SelectRows(Deduplicated, each [InvoiceDate] >= #datetime(2011,1,1,0,0,0) and [InvoiceDate] < #datetime(2011,12,1,0,0,0))",
+          "in",
+          "    CompleteMonths"
+        ]
+      }
+    ],
+    "annotations": [
+      {
+        "name": "PBI_QueryOrder",
+        "value": "[\"SourceFile\", \"RawRetail\", \"PreparedRetail\", \"ScopedRetail\", \"FactSales\", \"DimDate\", \"DimCountry\", \"DimProduct\", \"QualityAudit\"]"
+      },
+      {
+        "name": "__PBI_TimeIntelligenceEnabled",
+        "value": "0"
+      }
+    ]
+  }
+}

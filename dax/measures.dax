@@ -1,0 +1,25 @@
+Gross Sales = SUM(FactSales[GrossValue])
+
+Credit Value = SUM(FactSales[CreditValue])
+
+Net Sales = [Gross Sales] - [Credit Value]
+
+Orders = CALCULATE(DISTINCTCOUNT(FactSales[InvoiceNo]), FactSales[LineType] = "Sale")
+
+Average Order Value = DIVIDE([Gross Sales], [Orders])
+
+Known Customers = CALCULATE(DISTINCTCOUNT(FactSales[CustomerKey]), FactSales[CustomerKey] <> "Unknown", FactSales[LineType] = "Sale")
+
+Credit Value Ratio = DIVIDE([Credit Value], [Gross Sales])
+
+Identified Sales Share = DIVIDE(CALCULATE([Gross Sales], FactSales[CustomerKey] <> "Unknown"), [Gross Sales])
+
+Units Sold = CALCULATE(SUM(FactSales[Quantity]), FactSales[LineType] = "Sale")
+
+Source Rows = CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = "01 Source rows")
+
+Invalid Rows = CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = "02 Invalid rows excluded")
+
+Duplicates Removed = CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = "03 Exact duplicates removed")
+
+Rows Loaded = CALCULATE(SUM(QualityAudit[Rows]), QualityAudit[Step] = "05 Rows loaded")
